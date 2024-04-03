@@ -50,7 +50,8 @@ namespace XIVSlothCombo.Combos.PvE
             BreathOfMagic = 34567,
             MortalFlame = 34579,
             PeatPelt = 34569,
-            DeepClean = 34570;
+            DeepClean = 34570,
+            ConvictionMarcato = 34574;
 
         public static class Buffs
         {
@@ -64,7 +65,8 @@ namespace XIVSlothCombo.Combos.PvE
                 TankMimicry = 2124,
                 DPSMimicry = 2125,
                 BasicInstinct = 2498,
-                WingedReprobation = 3640;
+                WingedReprobation = 3640,
+                WingedRedemption = 3641;
         }
 
         public static class Debuffs
@@ -81,7 +83,8 @@ namespace XIVSlothCombo.Combos.PvE
                 Lightheaded = 2501,
                 MortalFlame = 3643,
                 BreathOfMagic = 3712,
-                Begrimed = 3636;
+                Begrimed = 3636,
+                Bleeding = 1714;
         }
 
         internal class BLU_BuffedSoT : CustomCombo
@@ -280,8 +283,31 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if (!HasEffect(Buffs.PhantomFlurry))
                     {
+                        if (ActionReady(All.LucidDreaming) &&
+                            LocalPlayer.CurrentMp <= 6000)
+                            return All.LucidDreaming;
+                        
                         if (IsEnabled(CustomComboPreset.BLU_PrimalCombo_WingedReprobation) && FindEffect(Buffs.WingedReprobation)?.StackCount > 1 && IsOffCooldown(WingedRepropbation))
                             return OriginalHook(WingedRepropbation);
+                        
+                        if ((GetDebuffRemainingTime(Debuffs.BreathOfMagic) < 4) && IsSpellActive(BreathOfMagic) && GetTargetDistance() <= 10)
+                        {
+                            if (!HasEffect(Buffs.Bristle) && IsSpellActive(Bristle))
+                                return Bristle;
+                            if (IsSpellActive(BreathOfMagic))
+                                return BreathOfMagic;
+                        }
+
+                        if ((GetDebuffRemainingTime(Debuffs.Bleeding) < 4) && IsSpellActive(SongOfTorment))
+                        {
+                            if (!HasEffect(Buffs.Bristle) && IsSpellActive(Bristle))
+                                return Bristle;
+                            if (IsSpellActive(SongOfTorment))
+                                return SongOfTorment;
+                        }
+
+                        if (IsSpellActive(ConvictionMarcato) && HasEffect(Buffs.WingedRedemption) && IsOffCooldown(ConvictionMarcato))
+                            return ConvictionMarcato;
 
                         if (IsOffCooldown(FeatherRain) && IsSpellActive(FeatherRain) &&
                             (IsNotEnabled(CustomComboPreset.BLU_PrimalCombo_Pool) || (IsEnabled(CustomComboPreset.BLU_PrimalCombo_Pool) && (GetCooldownRemainingTime(Nightbloom) > 30 || IsOffCooldown(Nightbloom)))))
@@ -317,10 +343,15 @@ namespace XIVSlothCombo.Combos.PvE
 
                         if (IsEnabled(CustomComboPreset.BLU_PrimalCombo_SeaShanty) && IsSpellActive(SeaShanty) && IsOffCooldown(SeaShanty))
                             return SeaShanty;
+                        
+                        if (IsSpellActive(BeingMortal) && IsOffCooldown(BeingMortal) && GetTargetDistance() <= 10)
+                            return BeingMortal;
 
                         if (IsEnabled(CustomComboPreset.BLU_PrimalCombo_PhantomFlurry) && IsOffCooldown(PhantomFlurry) && IsSpellActive(PhantomFlurry))
                             return PhantomFlurry;
                     }
+
+                    return SonicBoom;
                 }
 
                 return actionID;
